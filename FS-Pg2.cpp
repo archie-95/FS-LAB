@@ -1,0 +1,149 @@
+#include<iostream.h>
+#include<fstream.h>
+#include<conio.h>
+#include<stdio.h>
+#include<iomanip.h>
+#include<stdlib.h>
+#include<string.h>
+#define filename "std2.txt"
+fstreamifile;
+class student
+{
+char usn[15],name[20],age[5],branch[6],sem[5];
+public:
+void opener(fstream&ifile,char *fn,int mode);
+void read();
+void pack();
+void display();
+void unpack();
+int search();
+void modify(int);
+};
+// function to open a file
+void student::opener(fstream&sfile,char *fn,int mode)
+{
+sfile.open(fn,mode);
+if(!sfile)
+{
+cout<<"unable to open a file"<<endl;
+getch();
+exit(1);
+}
+}void student::read()
+{
+cout<<"enter the usn number:"; gets(usn);
+cout<<"enter the name:"; gets(name);
+cout<<"enter the age:"; gets(age);
+cout<<"enter the branch:"; gets(branch);
+cout<<"enter the sem:"; gets(sem);
+pack();
+}
+// function to pack the student record using delimiter
+void student::pack()
+{
+char buffer[75];
+strcpy(buffer,usn); strcat(buffer,"|");
+strcat(buffer,name); strcat(buffer,"|");
+strcat(buffer,age); strcat(buffer,"|");
+strcat(buffer,branch); strcat(buffer,"|");
+strcat(buffer,sem); strcat(buffer,"|");
+ifile.fill('*');
+ifile<<setiosflags(ios::left)<<setw(sizeof(student))<<buffer<<endl;
+}
+//function to display student record
+void student::display()
+{
+char buffer[75];
+cout<<setiosflags(ios::left);
+cout<<setw(15)<<"USN"<<setw(20)<<"NAME"<<setw(5)<<"AGE";
+cout<<setw(10)<<"BRANCH"<<setw(5)<<"SEM"<<endl;
+while(1)
+{
+unpack();
+if(ifile.eof())
+break;
+if(usn[0]!='$')
+{
+cout<<setw(15)<<usn<<setw(20)<<name<<setw(5)<<age;
+cout<<setw(10)<<branch<<setw(5)<<sem<<endl;
+}
+}
+}
+void student::unpack()
+{
+char dummy[75];
+ifile.getline(usn,15,'|');
+ifile.getline(name,20,'|');
+ifile.getline(age,5,'|');
+ifile.getline(branch,6,'|');
+ifile.getline(sem,5,'|');
+ifile.getline(dummy,75,'\n');
+}
+//function to search student record based on USN.
+int student::search()
+{
+int flag;
+charsusn[15];
+cout<<"enter the usn to be searched:";
+cin>>susn;
+while(!ifile.eof())
+{
+flag=ifile.tellg();
+unpack();
+if(usn[0]!='$' &&strcmp(usn,susn)==0)
+{
+cout<<"USN:"<<usn<<"\n"<<"NAME:"<<name<<"\n"<<"AGE:"<<age;
+cout<<"\n"<<"BRANCH:"<<branch<<"\n"<<"SEM:"<<sem<<"\n";
+return flag;
+}
+}
+return -1;
+}
+//function to modify record.
+void student::modify(intrecpos)
+{
+ifile.seekp(recpos,ios::beg);
+ifile.put('$');
+ifile.seekp(0,ios::end);
+read();
+}
+void main()
+{
+intch,flag;
+student s;
+clrscr();
+for(;;)
+{
+cout<<endl<<"1.- read\t2- display\t 3 .-search\t4.- modify\t5.- exit"<<endl;
+cout<<"enter the choice:";
+cin>>ch;
+switch(ch)
+{
+case 1: s.opener(ifile,filename,ios::app);
+cout<<"enter the student details\n";
+s.read();
+break;
+case 2: s.opener(ifile,filename,ios::in);
+cout<<"The student details are:"<<endl;
+s.display();
+break;
+case 3:s.opener(ifile,filename,ios::in);
+cout<<"Searching based on USN number"<<endl;
+flag=s.search();
+if(flag==-1)
+cout<<"Record not found"<<endl;
+break;
+case 4: s.opener(ifile,filename,ios::in | ios::out | ios::nocreate);
+cout<<"To modify the record based on USN"<<endl;
+flag=s.search();
+if(flag==-1)
+cout<<"Record not found"<<endl;
+else
+s.modify(flag);
+break;
+default:
+exit(0);
+}
+ifile.close();
+}
+}
